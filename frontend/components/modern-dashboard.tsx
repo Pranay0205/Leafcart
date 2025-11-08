@@ -67,7 +67,15 @@ export default function ModernDashboard({ externalUserId = "demo_user" }: Dashbo
       items: 28,
       category: "Groceries",
     },
-    { id: "3", merchant: "DoorDash", amount: 42.99, date: "2024-03-08", score: 62, items: 3, category: "Food Delivery" },
+    {
+      id: "3",
+      merchant: "DoorDash",
+      amount: 42.99,
+      date: "2024-03-08",
+      score: 62,
+      items: 3,
+      category: "Food Delivery",
+    },
     { id: "4", merchant: "Target", amount: 89.99, date: "2024-03-10", score: 58, items: 6, category: "Home" },
     { id: "5", merchant: "Costco", amount: 321.0, date: "2024-04-14", score: 78, items: 24, category: "Groceries" },
   ];
@@ -298,7 +306,7 @@ export default function ModernDashboard({ externalUserId = "demo_user" }: Dashbo
                     {merchantBrands[transaction.merchant]?.icon ? (
                       <div style={{ color: merchantBrands[transaction.merchant].color }}>
                         {React.createElement(merchantBrands[transaction.merchant].icon, {
-                          className: "w-7 h-7"
+                          className: "w-7 h-7",
                         })}
                       </div>
                     ) : (
