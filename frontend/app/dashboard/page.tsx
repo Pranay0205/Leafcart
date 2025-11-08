@@ -1,5 +1,5 @@
-import ModernDashboard from "@/components/modern-dashboard";
+import MerchantDashboard from "@/components/merchant-dashboard";
 
 export default function DashboardPage() {
-  return <ModernDashboard externalUserId="demo_user_123" />;
+  return <MerchantDashboard />;
 }
