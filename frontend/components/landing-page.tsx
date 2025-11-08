@@ -64,10 +64,18 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link
                 href="/dashboard"
-                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-emerald-500/40 transition-all flex items-center gap-2 group"
+                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-emerald-500/40 transition-all group"
               >
-                Start Your Journey
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <span>Start Your Journey</span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <div className="flex items-center gap-2 opacity-90">
+                    <span className="text-xs font-normal">Powered by</span>
+                    <img src="/powerd-by-logo.svg" alt="Knot" className="h-4 brightness-0 invert" />
+                  </div>
+                </div>
               </Link>
 
               <button className="px-8 py-4 bg-zinc-800/50 border border-zinc-700 rounded-xl font-semibold text-lg hover:bg-zinc-800 transition-all">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -12,6 +12,8 @@ import {
   ExternalLink,
   Link as LinkIcon,
   Settings,
+  RefreshCw,
+  Share2,
 } from "lucide-react";
 import { FaAmazon, FaApple } from "react-icons/fa";
 import { SiWalmart, SiTarget, SiDoordash, SiUber, SiInstacart } from "react-icons/si";
@@ -24,8 +26,12 @@ import {
   type Transaction,
 } from "@/lib/merchantData";
 import ConnectMerchantsModal from "./connect-merchants-modal";
-import AIChatWidget from "./ai-chat-widget";
+import AISearchBar from "./ai-search-bar";
 import { getMerchantRatingByName } from "@/lib/merchantRatings";
+import { getPreprocessedScore, type PreprocessedProductScore } from "@/lib/preprocessedScores";
+import ProductDetailModal from "./product-detail-modal";
+import ShareScoreModal from "./share-score-modal";
+import type { ProductSustainabilityScore, ScoredTransaction } from "@/lib/geminiAI";
 
 // Icon mapping for merchants
 const merchantIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -52,7 +58,21 @@ export default function ModernDashboard() {
     40, // IDs for Amazon, Walmart, Target, DoorDash, Costco, Uber Eats, Instacart
   ]);
 
-  const overallScore = getOverallScore();
+  // Product detail modal state
+  const [selectedProduct, setSelectedProduct] = useState<{
+    name: string;
+    price: number;
+    score: PreprocessedProductScore;
+  } | null>(null);
+
+  // Share modal state
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  // Use useRef instead of useState for the ref
+  const aiSearchBarRef = useRef<{
+    triggerSuggestion: (productName: string, score: number) => void;
+  } | null>(null);
+
   const totalSpent = getTotalSpending();
   const totalTransactions = getTotalTransactionCount();
 
@@ -108,6 +128,24 @@ export default function ModernDashboard() {
     });
   }, [connectedMerchantIds]);
 
+  // Calculate overall score from preprocessed data
+  const calculateOverallScore = useMemo(() => {
+    let totalScore = 0;
+    let productCount = 0;
+
+    activeMerchants.forEach((merchant) => {
+      merchant.transactions.forEach((transaction) => {
+        transaction.products.forEach((product) => {
+          const score = getPreprocessedScore(product.name);
+          totalScore += score.score;
+          productCount++;
+        });
+      });
+    });
+
+    return productCount > 0 ? Math.round(totalScore / productCount) : 0;
+  }, [activeMerchants]);
+
   // Recalculate stats based on active merchants only
   const activeOverallScore = useMemo(() => {
     const allTransactions = activeMerchants.flatMap((m) => m.transactions);
@@ -131,6 +169,24 @@ export default function ModernDashboard() {
     return activeMerchants.reduce((total, merchant) => total + merchant.transactions.length, 0);
   }, [activeMerchants]);
 
+  // Handle product click to show details
+  const handleProductClick = (productName: string, productPrice: number) => {
+    const score = getPreprocessedScore(productName);
+    setSelectedProduct({
+      name: productName,
+      price: productPrice,
+      score,
+    });
+  };
+
+  // Handle getting better suggestions from modal
+  const handleGetSuggestions = (productName: string, score: number) => {
+    setSelectedProduct(null); // Close modal
+    if (aiSearchBarRef.current) {
+      aiSearchBarRef.current.triggerSuggestion(productName, score);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white pb-24">
       {/* Header */}
@@ -148,13 +204,22 @@ export default function ModernDashboard() {
                 <p className="text-xs text-zinc-400">Sustainability Dashboard</p>
               </div>
             </div>
-            <button
-              onClick={() => setIsConnectModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="text-sm font-medium">Manage Merchants</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-lg transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                <span className="text-sm font-medium">Share Score</span>
+              </button>
+              <button
+                onClick={() => setIsConnectModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="text-sm font-medium">Manage Merchants</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -171,8 +236,8 @@ export default function ModernDashboard() {
               </div>
               <div className="text-sm text-zinc-400">Sustainability Score</div>
             </div>
-            <div className="text-4xl font-bold text-white mb-2">{activeOverallScore}</div>
-            <div className="text-sm text-zinc-500">Out of 100</div>
+            <div className="text-4xl font-bold text-white mb-2">{calculateOverallScore}</div>
+            <div className="text-sm text-zinc-500">Based on product analysis</div>
           </div>
 
           {/* Total Spent */}
@@ -327,19 +392,42 @@ export default function ModernDashboard() {
                                     <span>{transaction.products.length} items</span>
                                   </div>
 
-                                  {/* Products Preview (first 3) */}
-                                  <div className="space-y-1 mb-3">
-                                    {transaction.products.slice(0, 3).map((product, idx) => (
-                                      <div key={idx} className="text-sm text-zinc-300">
-                                        <Package className="w-3 h-3 inline mr-2 text-zinc-500" />
-                                        {product.quantity}x {product.name}
-                                      </div>
-                                    ))}
-                                    {transaction.products.length > 3 && (
-                                      <div className="text-xs text-zinc-500 ml-5">
-                                        +{transaction.products.length - 3} more items
-                                      </div>
-                                    )}
+                                  {/* Products List with Scores */}
+                                  <div className="space-y-2 mb-3">
+                                    {transaction.products.map((product, idx) => {
+                                      const productScore = getPreprocessedScore(product.name);
+                                      const scoreColor = getScoreColor(productScore.score);
+                                      const isBadScore = productScore.score < 50;
+
+                                      return (
+                                        <div
+                                          key={idx}
+                                          onClick={() => handleProductClick(product.name, product.price.unitPrice)}
+                                          className={`flex items-center justify-between p-2 rounded-lg transition-all cursor-pointer ${
+                                            isBadScore
+                                              ? "bg-red-500/5 hover:bg-red-500/10 border border-red-500/20"
+                                              : "bg-zinc-800/30 hover:bg-zinc-800/50"
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-2 flex-1">
+                                            <Package className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                                            <span className="text-sm text-zinc-300">
+                                              {product.quantity}x {product.name}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-3">
+                                            <span className="text-sm text-zinc-400">
+                                              ${product.price.unitPrice.toFixed(2)}
+                                            </span>
+                                            <div className={`px-2 py-1 rounded ${getScoreBgColor(productScore.score)}`}>
+                                              <span className={`text-xs font-bold ${scoreColor}`}>
+                                                {productScore.score}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
 
@@ -392,8 +480,29 @@ export default function ModernDashboard() {
         onToggleMerchant={handleToggleMerchant}
       />
 
-      {/* AI Chat Widget */}
-      <AIChatWidget />
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <ProductDetailModal
+          isOpen={true}
+          onClose={() => setSelectedProduct(null)}
+          productName={selectedProduct.name}
+          price={selectedProduct.price}
+          score={selectedProduct.score}
+          onGetSuggestions={handleGetSuggestions}
+        />
+      )}
+
+      {/* Share Score Modal */}
+      <ShareScoreModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        score={calculateOverallScore}
+        totalTransactions={activeTotalTransactions}
+        totalSpent={activeTotalSpent}
+      />
+
+      {/* AI Search Bar */}
+      <AISearchBar ref={aiSearchBarRef} userScore={calculateOverallScore} />
     </div>
   );
 }
