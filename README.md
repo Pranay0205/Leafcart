@@ -5,6 +5,7 @@ A comprehensive sustainability tracking platform that helps users make eco-frien
 ## 🌟 Features
 
 ### 1. **Merchant Management System**
+
 - **Connect/Disconnect Merchants**: Dedicated UI for managing merchant connections
 - **40+ Supported Merchants**: Including Amazon, Walmart, Target, DoorDash, Uber Eats, and more
 - **Sustainability Ratings**: Each merchant has a 1-5 star rating based on environmental impact:
@@ -15,6 +16,7 @@ A comprehensive sustainability tracking platform that helps users make eco-frien
   - ⭐ **Avoid**: Non-renewable, non-recyclable materials
 
 ### 2. **Transaction Tracking**
+
 - View all transactions from connected merchants
 - Expandable transaction details with product lists
 - Show 10 transactions initially, load more in batches of 10
@@ -22,6 +24,7 @@ A comprehensive sustainability tracking platform that helps users make eco-frien
 - Sustainability scoring for each transaction
 
 ### 3. **AI Chat Assistant**
+
 - Floating chat widget for sustainability queries
 - Get advice on eco-friendly alternatives
 - Learn about product sustainability ratings
@@ -29,6 +32,7 @@ A comprehensive sustainability tracking platform that helps users make eco-frien
 - Customizable and extensible for any AI backend
 
 ### 4. **Dashboard Analytics**
+
 - Overall sustainability score (0-100)
 - Total spending across all connected merchants
 - Transaction count tracking
@@ -75,34 +79,40 @@ frontend/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ installed
 - Knot API credentials (client_id and secret)
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd Leafcart/frontend
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Configure environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 4. Edit `.env.local` with your Knot API credentials:
+
 ```env
 NEXT_PUBLIC_KNOT_CLIENT_ID=your_client_id_here
 NEXT_PUBLIC_KNOT_SECRET=your_secret_here
 ```
 
 5. Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -117,13 +127,13 @@ The application uses the Knot API for fetching merchant transactions. Configurat
 
 ```typescript
 export const API_CONFIG = {
-  baseUrl: 'https://development.knotapi.com',
+  baseUrl: "https://development.knotapi.com",
   endpoints: {
-    transactionSync: '/transactions/sync',
-    merchantList: '/merchant/list',
-    accountsGet: '/accounts',
+    transactionSync: "/transactions/sync",
+    merchantList: "/merchant/list",
+    accountsGet: "/accounts",
     // ... more endpoints
-  }
+  },
 };
 ```
 
@@ -132,27 +142,28 @@ export const API_CONFIG = {
 ```typescript
 // Fetch available merchants
 await fetchMerchantList({
-  type: 'transaction_link',
-  platform: 'web',
-  external_user_id: 'user_123'
+  type: "transaction_link",
+  platform: "web",
+  external_user_id: "user_123",
 });
 
 // Sync transactions for a merchant
 await syncTransactions({
   merchant_id: 44,
-  external_user_id: 'user_123',
-  limit: 100
+  external_user_id: "user_123",
+  limit: 100,
 });
 
 // Get connected accounts
 await getAccounts({
-  external_user_id: 'user_123'
+  external_user_id: "user_123",
 });
 ```
 
 ## 🎯 Key Components
 
 ### Connect Merchants Modal
+
 - Search and filter merchants
 - Filter by sustainability rating (1-5 stars)
 - Visual rating indicators with color gradients
@@ -160,6 +171,7 @@ await getAccounts({
 - Toggle connections on/off
 
 ### AI Chat Widget
+
 - Floating chat button in bottom-right
 - Minimizable chat interface
 - Message history
@@ -167,6 +179,7 @@ await getAccounts({
 - Customizable AI responses
 
 ### Dashboard
+
 - Dynamic stats based on connected merchants
 - Expandable merchant cards
 - Transaction details with product lists
@@ -176,7 +189,9 @@ await getAccounts({
 ## 📊 Sustainability Scoring
 
 ### Product-Level Scoring
+
 Products are scored based on:
+
 - Sustainable materials (organic, recycled, bamboo)
 - Certifications (GOTS, FSC, Rainforest Alliance)
 - Biodegradability
@@ -184,13 +199,17 @@ Products are scored based on:
 - Packaging sustainability
 
 ### Transaction Scoring
+
 Each transaction receives a score (0-100) based on:
+
 - Presence of sustainable keywords in product names
 - Avoidance of single-use plastics
 - Eco-friendly product categories
 
 ### Merchant Ratings
+
 Merchants are rated 1-5 stars based on:
+
 - Corporate sustainability commitments
 - Material sourcing practices
 - Environmental certifications
@@ -211,11 +230,11 @@ Merchants are rated 1-5 stars based on:
 
 ## 📝 Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_KNOT_CLIENT_ID` | Knot API client ID | Yes |
-| `NEXT_PUBLIC_KNOT_SECRET` | Knot API secret key | Yes |
-| `NEXT_PUBLIC_USE_MOCK_DATA` | Use mock data instead of API | No |
+| Variable                     | Description                  | Required |
+| ---------------------------- | ---------------------------- | -------- |
+| `NEXT_PUBLIC_KNOT_CLIENT_ID` | Knot API client ID           | Yes      |
+| `NEXT_PUBLIC_KNOT_SECRET`    | Knot API secret key          | Yes      |
+| `NEXT_PUBLIC_USE_MOCK_DATA`  | Use mock data instead of API | No       |
 
 ## 🤝 Contributing
 
