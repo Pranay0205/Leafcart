@@ -56,46 +56,22 @@ export default function LandingPage() {
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed">
-              LeafCart analyzes your purchase history and provides personalized sustainability scores, helping you make
-              eco-conscious decisions with every transaction.
+            <p className="text-xl md:text-2xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              Get personalized sustainability scores for your purchases and make eco-conscious choices.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link
                 href="/dashboard"
-                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-emerald-500/40 transition-all group"
+                className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-emerald-500/40 transition-all flex items-center gap-2 group"
               >
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <span>Start Your Journey</span>
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                  <div className="flex items-center gap-2 opacity-90">
-                    <span className="text-xs font-normal">Powered by</span>
-                    <img src="/powerd-by-logo.svg" alt="Knot" className="h-4 brightness-0 invert" />
-                  </div>
-                </div>
+                <span>Start Your Journey</span>
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
 
-              <button className="px-8 py-4 bg-zinc-800/50 border border-zinc-700 rounded-xl font-semibold text-lg hover:bg-zinc-800 transition-all">
-                Watch Demo
-              </button>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 pt-16 max-w-3xl mx-auto">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-400">500K+</div>
-                <div className="text-zinc-500 mt-1">Active Users</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-400">2M+</div>
-                <div className="text-zinc-500 mt-1">Transactions Analyzed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-emerald-400">85%</div>
-                <div className="text-zinc-500 mt-1">Impact Improvement</div>
+              <div className="flex items-center gap-2 px-8 py-4">
+                <span className="text-sm text-zinc-400">Powered by</span>
+                <img src="/powerd-by-logo.svg" alt="Knot" className="h-5 brightness-0 invert" />
               </div>
             </div>
           </div>
@@ -224,89 +200,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Impact Section */}
-      <section id="impact" className="py-20 px-6 bg-zinc-900/50">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Make a Real
-                <br />
-                <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
-                  Environmental Impact
-                </span>
-              </h2>
-              <p className="text-xl text-zinc-400 mb-8 leading-relaxed">
-                Every purchase you make has an impact. LeafCart helps you understand that impact and make better choices
-                for our planet.
-              </p>
-
-              <div className="space-y-4">
-                {[
-                  { label: "CO₂ Emissions Reduced", value: "2.5M tons" },
-                  { label: "Sustainable Products Chosen", value: "8.3M items" },
-                  { label: "Trees Planted Through Partners", value: "1.2M trees" },
-                ].map((stat, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-xl">
-                    <span className="text-zinc-400">{stat.label}</span>
-                    <span className="text-2xl font-bold text-emerald-400">{stat.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-green-600/20 rounded-3xl blur-3xl" />
-              <div className="relative bg-zinc-800/50 border border-zinc-700 rounded-3xl p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl flex items-center justify-center">
-                    <Heart className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold">Join the Movement</div>
-                    <div className="text-zinc-400">Be part of the change</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-zinc-300">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-                    <span>Track your environmental footprint</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-zinc-300">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-                    <span>Get personalized eco-tips</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-zinc-300">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-                    <span>Compete with friends</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-zinc-300">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-                    <span>Earn rewards for sustainability</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-4xl">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-green-600/20 rounded-3xl blur-3xl" />
             <div className="relative bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-zinc-700 rounded-3xl p-12 text-center backdrop-blur-xl">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Make a Difference?</h2>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Get Started?</h2>
               <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
-                Join thousands of conscious consumers making sustainable choices every day
+                Start tracking your sustainability score today
               </p>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-emerald-500/40 transition-all group"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl font-semibold text-lg hover:shadow-2xl hover:shadow-emerald-500/40 transition-all hover:scale-105 group"
               >
-                Start Your Free Trial
+                Get Started Now
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

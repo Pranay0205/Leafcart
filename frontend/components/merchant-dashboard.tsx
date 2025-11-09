@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   ChevronDown,
   ChevronUp,
@@ -27,10 +28,11 @@ import {
 } from "@/lib/merchantData";
 import ConnectMerchantsModal from "./connect-merchants-modal";
 import AISearchBar from "./ai-search-bar";
-import { getMerchantRatingByName } from "@/lib/merchantRatings";
+import { getMerchantRatingByName, getMerchantRating } from "@/lib/merchantRatings";
 import { getPreprocessedScore, type PreprocessedProductScore } from "@/lib/preprocessedScores";
 import ProductDetailModal from "./product-detail-modal";
 import ShareScoreModal from "./share-score-modal";
+import ScoreDonutChart from "./score-donut-chart";
 import type { ProductSustainabilityScore, ScoredTransaction } from "@/lib/geminiAI";
 
 // Icon mapping for merchants
@@ -120,13 +122,11 @@ export default function ModernDashboard() {
     );
   };
 
-  // Filter merchants based on connected status
+  // Show all merchants from merchant data - they all have transaction data loaded
   const activeMerchants = useMemo(() => {
-    return merchants.filter((merchant) => {
-      const rating = getMerchantRatingByName(merchant.name);
-      return rating && connectedMerchantIds.includes(rating.id);
-    });
-  }, [connectedMerchantIds]);
+    // Simply return all merchants from merchantData since all JSON files are loaded
+    return merchants.filter((m) => m.connected);
+  }, []);
 
   // Calculate overall score from preprocessed data
   const calculateOverallScore = useMemo(() => {
@@ -193,7 +193,7 @@ export default function ModernDashboard() {
       <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-600 rounded-xl flex items-center justify-center">
                 <Leaf className="w-6 h-6 text-white" />
               </div>
@@ -203,7 +203,7 @@ export default function ModernDashboard() {
                 </h1>
                 <p className="text-xs text-zinc-400">Sustainability Dashboard</p>
               </div>
-            </div>
+            </Link>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsShareModalOpen(true)}
@@ -228,41 +228,42 @@ export default function ModernDashboard() {
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Stats Overview */}
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Overall Score */}
+          {/* Overall Score with Donut Chart */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-emerald-500/10 rounded-lg">
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
               </div>
-              <div className="text-sm text-zinc-400">Sustainability Score</div>
+              <div className="text-sm text-zinc-400">Your Sustainability Score</div>
             </div>
-            <div className="text-4xl font-bold text-white mb-2">{calculateOverallScore}</div>
-            <div className="text-sm text-zinc-500">Based on product analysis</div>
+            <div className="flex justify-center">
+              <ScoreDonutChart score={calculateOverallScore} size={200} />
+            </div>
           </div>
 
           {/* Total Spent */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+            <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <DollarSign className="w-5 h-5 text-blue-400" />
               </div>
               <div className="text-sm text-zinc-400">Total Spending</div>
             </div>
-            <div className="text-4xl font-bold text-white mb-2">
+            <div className="text-5xl font-bold text-white mb-3">
               ${activeTotalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <div className="text-sm text-zinc-500">Across all merchants</div>
           </div>
 
           {/* Total Transactions */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+            <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-purple-500/10 rounded-lg">
                 <ShoppingBag className="w-5 h-5 text-purple-400" />
               </div>
               <div className="text-sm text-zinc-400">Total Transactions</div>
             </div>
-            <div className="text-4xl font-bold text-white mb-2">{activeTotalTransactions.toLocaleString()}</div>
+            <div className="text-5xl font-bold text-white mb-3">{activeTotalTransactions.toLocaleString()}</div>
             <div className="text-sm text-zinc-500">All time</div>
           </div>
         </div>
@@ -270,7 +271,7 @@ export default function ModernDashboard() {
         {/* Merchants Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Your Merchants</h2>
+            <h2 className="text-2xl font-bold">Your Transactions</h2>
             <p className="text-sm text-zinc-400">{activeMerchants.length} connected</p>
           </div>
 
@@ -294,8 +295,10 @@ export default function ModernDashboard() {
                 const Icon = merchantIcons[merchant.name] || ShoppingBag;
                 const isExpanded = expandedMerchant === merchant.id;
                 const limit = transactionLimit[merchant.id] || 10;
-                const visibleTransactions = merchant.transactions.slice(0, limit);
-                const hasMore = merchant.transactions.length > limit;
+                // Sort transactions by total amount (highest first)
+                const sortedTransactions = [...merchant.transactions].sort((a, b) => b.price.total - a.price.total);
+                const visibleTransactions = sortedTransactions.slice(0, limit);
+                const hasMore = sortedTransactions.length > limit;
 
                 return (
                   <div key={merchant.id} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
@@ -310,7 +313,7 @@ export default function ModernDashboard() {
                             className="w-16 h-16 rounded-xl flex items-center justify-center"
                             style={{ backgroundColor: `${merchant.color}20` }}
                           >
-                            <div style={{ color: merchant.color }}>
+                            <div style={{ color: merchant.name === "Uber Eats" ? "white" : merchant.color }}>
                               <Icon className="w-8 h-8" />
                             </div>
                           </div>
@@ -355,111 +358,127 @@ export default function ModernDashboard() {
                     {isExpanded && (
                       <div className="border-t border-zinc-800">
                         <div className="p-6 space-y-3">
-                          {visibleTransactions.map((transaction) => (
-                            <div
-                              key={transaction.externalId}
-                              className="p-4 bg-zinc-800/30 hover:bg-zinc-800/50 border border-zinc-800 rounded-xl transition-all group"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <span className="font-medium">Order #{transaction.externalId}</span>
-                                    <span
-                                      className={`px-2 py-1 rounded text-xs font-medium ${
-                                        transaction.orderStatus === "DELIVERED"
-                                          ? "bg-emerald-500/10 text-emerald-400"
-                                          : transaction.orderStatus === "ORDERED"
-                                          ? "bg-blue-500/10 text-blue-400"
-                                          : "bg-zinc-500/10 text-zinc-400"
-                                      }`}
-                                    >
-                                      {transaction.orderStatus}
-                                    </span>
-                                    <a
-                                      href={transaction.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-zinc-400 hover:text-emerald-400 transition-colors"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <ExternalLink className="w-4 h-4" />
-                                    </a>
-                                  </div>
-
-                                  <div className="text-sm text-zinc-400 mb-3">
-                                    <span>{formatDate(transaction.dateTime)}</span>
-                                    <span className="mx-2">•</span>
-                                    <span>{transaction.products.length} items</span>
-                                  </div>
-
-                                  {/* Products List with Scores */}
-                                  <div className="space-y-2 mb-3">
-                                    {transaction.products.map((product, idx) => {
-                                      const productScore = getPreprocessedScore(product.name);
-                                      const scoreColor = getScoreColor(productScore.score);
-                                      const isBadScore = productScore.score < 50;
-
-                                      return (
-                                        <div
-                                          key={idx}
-                                          onClick={() => handleProductClick(product.name, product.price.unitPrice)}
-                                          className={`flex items-center justify-between p-2 rounded-lg transition-all cursor-pointer ${
-                                            isBadScore
-                                              ? "bg-red-500/5 hover:bg-red-500/10 border border-red-500/20"
-                                              : "bg-zinc-800/30 hover:bg-zinc-800/50"
+                          {merchant.transactions.length === 0 ? (
+                            <div className="text-center py-12">
+                              <Package className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
+                              <p className="text-zinc-400 font-medium mb-1">No transactions yet</p>
+                              <p className="text-sm text-zinc-500">
+                                Transaction data will appear here once you make purchases
+                              </p>
+                            </div>
+                          ) : (
+                            <>
+                              {visibleTransactions.map((transaction) => (
+                                <div
+                                  key={transaction.externalId}
+                                  className="p-4 bg-zinc-800/30 hover:bg-zinc-800/50 border border-zinc-800 rounded-xl transition-all group"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-3 mb-2">
+                                        <span className="font-medium">Order #{transaction.externalId}</span>
+                                        <span
+                                          className={`px-2 py-1 rounded text-xs font-medium ${
+                                            transaction.orderStatus === "DELIVERED"
+                                              ? "bg-emerald-500/10 text-emerald-400"
+                                              : transaction.orderStatus === "ORDERED"
+                                              ? "bg-blue-500/10 text-blue-400"
+                                              : "bg-zinc-500/10 text-zinc-400"
                                           }`}
                                         >
-                                          <div className="flex items-center gap-2 flex-1">
-                                            <Package className="w-3 h-3 text-zinc-500 flex-shrink-0" />
-                                            <span className="text-sm text-zinc-300">
-                                              {product.quantity}x {product.name}
-                                            </span>
-                                          </div>
-                                          <div className="flex items-center gap-3">
-                                            <span className="text-sm text-zinc-400">
-                                              ${product.price.unitPrice.toFixed(2)}
-                                            </span>
-                                            <div className={`px-2 py-1 rounded ${getScoreBgColor(productScore.score)}`}>
-                                              <span className={`text-xs font-bold ${scoreColor}`}>
-                                                {productScore.score}
-                                              </span>
+                                          {transaction.orderStatus}
+                                        </span>
+                                        <a
+                                          href={transaction.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-zinc-400 hover:text-emerald-400 transition-colors"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <ExternalLink className="w-4 h-4" />
+                                        </a>
+                                      </div>
+
+                                      <div className="text-sm text-zinc-400 mb-3">
+                                        <span>{formatDate(transaction.dateTime)}</span>
+                                        <span className="mx-2">•</span>
+                                        <span>{transaction.products.length} items</span>
+                                      </div>
+
+                                      {/* Products List with Scores */}
+                                      <div className="space-y-2 mb-3">
+                                        {transaction.products.map((product, idx) => {
+                                          const productScore = getPreprocessedScore(product.name);
+                                          const scoreColor = getScoreColor(productScore.score);
+                                          const isBadScore = productScore.score < 50;
+
+                                          return (
+                                            <div
+                                              key={idx}
+                                              onClick={() => handleProductClick(product.name, product.price.unitPrice)}
+                                              className={`flex items-center justify-between p-2 rounded-lg transition-all cursor-pointer ${
+                                                isBadScore
+                                                  ? "bg-red-500/5 hover:bg-red-500/10 border border-red-500/20"
+                                                  : "bg-zinc-800/30 hover:bg-zinc-800/50"
+                                              }`}
+                                            >
+                                              <div className="flex items-center gap-2 flex-1">
+                                                <Package className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                                                <span className="text-sm text-zinc-300">
+                                                  {product.quantity}x {product.name}
+                                                </span>
+                                              </div>
+                                              <div className="flex items-center gap-3">
+                                                <span className="text-sm text-zinc-400">
+                                                  ${product.price.unitPrice.toFixed(2)}
+                                                </span>
+                                                <div
+                                                  className={`px-2 py-1 rounded ${getScoreBgColor(productScore.score)}`}
+                                                >
+                                                  <span className={`text-xs font-bold ${scoreColor}`}>
+                                                    {productScore.score}
+                                                  </span>
+                                                </div>
+                                              </div>
                                             </div>
-                                          </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-end flex-col gap-2 ml-4">
+                                      <div className="text-right">
+                                        <div className="text-xl font-semibold">
+                                          ${transaction.price.total.toFixed(2)}
                                         </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
+                                        <div className="text-xs text-zinc-500">
+                                          Subtotal: ${transaction.price.subTotal.toFixed(2)}
+                                        </div>
+                                      </div>
 
-                                <div className="flex items-end flex-col gap-2 ml-4">
-                                  <div className="text-right">
-                                    <div className="text-xl font-semibold">${transaction.price.total.toFixed(2)}</div>
-                                    <div className="text-xs text-zinc-500">
-                                      Subtotal: ${transaction.price.subTotal.toFixed(2)}
+                                      {transaction.score && (
+                                        <div className={`px-3 py-1 rounded-lg ${getScoreBgColor(transaction.score)}`}>
+                                          <span className={`text-lg font-bold ${getScoreColor(transaction.score)}`}>
+                                            {transaction.score}
+                                          </span>
+                                          <span className="text-xs text-zinc-500 ml-1">score</span>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
-
-                                  {transaction.score && (
-                                    <div className={`px-3 py-1 rounded-lg ${getScoreBgColor(transaction.score)}`}>
-                                      <span className={`text-lg font-bold ${getScoreColor(transaction.score)}`}>
-                                        {transaction.score}
-                                      </span>
-                                      <span className="text-xs text-zinc-500 ml-1">score</span>
-                                    </div>
-                                  )}
                                 </div>
-                              </div>
-                            </div>
-                          ))}
+                              ))}
 
-                          {/* Load More Button */}
-                          {hasMore && (
-                            <button
-                              onClick={() => loadMoreTransactions(merchant.id)}
-                              className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm font-medium transition-colors"
-                            >
-                              View More ({merchant.transactions.length - limit} remaining)
-                            </button>
+                              {/* Load More Button */}
+                              {hasMore && (
+                                <button
+                                  onClick={() => loadMoreTransactions(merchant.id)}
+                                  className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm font-medium transition-colors"
+                                >
+                                  View More ({sortedTransactions.length - limit} remaining)
+                                </button>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
