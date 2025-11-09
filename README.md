@@ -1,4 +1,4 @@
-# 🍃 LeafCart
+# 🍃 LeafCart- by: Pranay, Shreeya, Arundhati
 
 A sustainability tracking dashboard that helps you make eco-friendly shopping decisions. Track your environmental impact across multiple merchants, get AI-powered recommendations, and earn rewards for sustainable choices.
 
