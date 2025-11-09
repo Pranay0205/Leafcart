@@ -34,6 +34,7 @@ import { getPreprocessedScore, type PreprocessedProductScore } from "@/lib/prepr
 import ProductDetailModal from "./product-detail-modal";
 import ShareScoreModal from "./share-score-modal";
 import AnimatedNumber from "./animated-number";
+import Footer from "./footer";
 import type { ProductSustainabilityScore, ScoredTransaction } from "@/lib/geminiAI";
 
 // Icon mapping for merchants
@@ -557,6 +558,9 @@ export default function ModernDashboard() {
 
       {/* AI Search Bar */}
       <AISearchBar ref={aiSearchBarRef} userScore={calculateOverallScore} />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

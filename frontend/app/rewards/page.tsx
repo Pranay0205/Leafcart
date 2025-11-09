@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Leaf, Gift, Trophy, Star, Award, ChevronLeft, Copy, Check, Calendar, Tag } from "lucide-react";
 import { merchants } from "@/lib/merchantData";
 import { getPreprocessedScore } from "@/lib/preprocessedScores";
+import Footer from "@/components/footer";
 
 export default function RewardsPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -395,6 +396,7 @@ export default function RewardsPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

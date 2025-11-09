@@ -3,6 +3,7 @@
 import React from "react";
 import { Leaf, ShoppingCart, TrendingUp, Award, Shield, Zap, ChevronRight, Sparkles, Globe, Heart } from "lucide-react";
 import Link from "next/link";
+import Footer from "./footer";
 
 export default function LandingPage() {
   return (
@@ -218,32 +219,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-800">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <img src="/favicon.svg" alt="LeafCart Logo" className="w-8 h-8" />
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
-                LeafCart
-              </span>
-            </div>
-
-            <div className="flex items-center gap-8 text-sm text-zinc-400">
-              <a href="#" className="hover:text-white transition-colors">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Terms
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Contact
-              </a>
-            </div>
-
-            <div className="text-sm text-zinc-500">© 2025 LeafCart. All rights reserved.</div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
