@@ -169,9 +169,9 @@ export default function RewardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-24">
+    <div className="min-h-screen bg-background text-white pb-24">
       {/* Header */}
-      <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -234,7 +234,7 @@ export default function RewardsPage() {
           </h2>
 
           {coupons.length === 0 ? (
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 text-center">
+            <div className="bg-card/50 border border-border rounded-2xl p-12 text-center">
               <Gift className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
               <h3 className="text-xl font-semibold mb-2">No Coupons Yet</h3>
               <p className="text-zinc-400 mb-4">
@@ -247,7 +247,7 @@ export default function RewardsPage() {
               {coupons.map((coupon) => (
                 <div
                   key={coupon.id}
-                  className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all"
+                  className="bg-card/50 border border-border rounded-2xl overflow-hidden hover:border-border/80 transition-all"
                 >
                   <div className={`h-2 bg-gradient-to-r ${coupon.color}`} />
                   <div className="p-6 space-y-4">
@@ -313,8 +313,8 @@ export default function RewardsPage() {
                 key={achievement.id}
                 className={`p-6 rounded-2xl border transition-all ${
                   achievement.earned
-                    ? "bg-zinc-900/50 border-zinc-700 hover:border-zinc-600"
-                    : "bg-zinc-900/20 border-zinc-800 opacity-50"
+                    ? "bg-card/50 border-border hover:border-border/80"
+                    : "bg-card/20 border-border opacity-50"
                 }`}
               >
                 <div className="flex items-start gap-4">

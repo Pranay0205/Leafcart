@@ -22,6 +22,78 @@ export default function ProductDetailModal({
 }: ProductDetailModalProps) {
   if (!isOpen) return null;
 
+  // Generate descriptive text for sustainability factors
+  const getFactorDescription = (factor: string, value: number): string => {
+    const factorName = factor
+      .replace(/([A-Z])/g, " $1")
+      .trim()
+      .toLowerCase();
+
+    const descriptions: Record<string, { good: string; bad: string; moderate: string }> = {
+      "material quality": {
+        good: "Made from high-quality, durable materials that last longer",
+        bad: "Low-quality materials that wear out quickly and contribute to waste",
+        moderate: "Decent material quality but could be more durable",
+      },
+      "environmental impact": {
+        good: "Minimal carbon footprint and eco-friendly production process",
+        bad: "High carbon emissions and harmful environmental impact during production",
+        moderate: "Moderate environmental impact with room for improvement",
+      },
+      recyclability: {
+        good: "Fully recyclable materials that can be easily repurposed",
+        bad: "Non-recyclable materials that end up in landfills",
+        moderate: "Partially recyclable with some components that can be reused",
+      },
+      biodegradability: {
+        good: "Biodegradable and breaks down naturally without harming the environment",
+        bad: "Non-biodegradable and persists in the environment for years",
+        moderate: "Takes time to decompose but eventually breaks down",
+      },
+      packaging: {
+        good: "Minimal, recyclable packaging made from sustainable materials",
+        bad: "Excessive plastic packaging that's harmful to the environment",
+        moderate: "Some recyclable packaging but could be reduced",
+      },
+      "carbon footprint": {
+        good: "Low carbon emissions from production and transportation",
+        bad: "High carbon footprint contributing to climate change",
+        moderate: "Average carbon emissions with potential for reduction",
+      },
+      toxicity: {
+        good: "Non-toxic and safe for human health and the environment",
+        bad: "Contains harmful chemicals or toxic substances",
+        moderate: "Some chemicals present but within acceptable limits",
+      },
+      renewability: {
+        good: "Made from renewable resources that can be replenished",
+        bad: "Relies on non-renewable resources that deplete natural reserves",
+        moderate: "Mix of renewable and non-renewable materials",
+      },
+      "production ethics": {
+        good: "Ethical production with fair labor practices and sustainable sourcing",
+        bad: "Questionable production practices and poor labor conditions",
+        moderate: "Some ethical considerations but not fully transparent",
+      },
+      longevity: {
+        good: "Built to last, reducing the need for frequent replacements",
+        bad: "Short lifespan requiring frequent replacement and creating waste",
+        moderate: "Decent durability but not designed for long-term use",
+      },
+    };
+
+    const factorKey = factorName.toLowerCase();
+    const desc = descriptions[factorKey] || {
+      good: `Good ${factorName} rating`,
+      bad: `Poor ${factorName} rating`,
+      moderate: `Moderate ${factorName} rating`,
+    };
+
+    if (value >= 70) return desc.good;
+    if (value >= 40) return desc.moderate;
+    return desc.bad;
+  };
+
   const getScoreColor = (scoreValue: number) => {
     if (scoreValue >= 70) return "text-emerald-400";
     if (scoreValue >= 40) return "text-yellow-400";
@@ -111,15 +183,18 @@ export default function ProductDetailModal({
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                 <h4 className="font-semibold text-emerald-400">What's Good</h4>
               </div>
-              <ul className="space-y-2 text-sm text-zinc-300">
+              <ul className="space-y-3 text-sm text-zinc-300">
                 {Object.entries(score.sustainabilityFactors)
                   .filter(([_, value]) => value >= 70)
                   .map(([factor, value]) => (
                     <li key={factor} className="flex items-start gap-2">
-                      <span className="text-emerald-400 mt-0.5">✓</span>
-                      <span>
-                        <span className="capitalize">{factor.replace(/([A-Z])/g, " $1").trim()}</span>: {value}/100
-                      </span>
+                      <span className="text-emerald-400 mt-1 shrink-0">✓</span>
+                      <div>
+                        <div className="font-medium text-emerald-300 capitalize mb-1">
+                          {factor.replace(/([A-Z])/g, " $1").trim()}
+                        </div>
+                        <p className="text-zinc-400 text-xs leading-relaxed">{getFactorDescription(factor, value)}</p>
+                      </div>
                     </li>
                   ))}
                 {Object.entries(score.sustainabilityFactors).filter(([_, value]) => value >= 70).length === 0 && (
@@ -134,15 +209,18 @@ export default function ProductDetailModal({
                 <AlertCircle className="w-5 h-5 text-red-400" />
                 <h4 className="font-semibold text-red-400">What's Bad</h4>
               </div>
-              <ul className="space-y-2 text-sm text-zinc-300">
+              <ul className="space-y-3 text-sm text-zinc-300">
                 {Object.entries(score.sustainabilityFactors)
                   .filter(([_, value]) => value < 50)
                   .map(([factor, value]) => (
                     <li key={factor} className="flex items-start gap-2">
-                      <span className="text-red-400 mt-0.5">✗</span>
-                      <span>
-                        <span className="capitalize">{factor.replace(/([A-Z])/g, " $1").trim()}</span>: {value}/100
-                      </span>
+                      <span className="text-red-400 mt-1 shrink-0">✗</span>
+                      <div>
+                        <div className="font-medium text-red-300 capitalize mb-1">
+                          {factor.replace(/([A-Z])/g, " $1").trim()}
+                        </div>
+                        <p className="text-zinc-400 text-xs leading-relaxed">{getFactorDescription(factor, value)}</p>
+                      </div>
                     </li>
                   ))}
                 {Object.entries(score.sustainabilityFactors).filter(([_, value]) => value < 50).length === 0 && (

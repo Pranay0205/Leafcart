@@ -33,7 +33,7 @@ import { getMerchantRatingByName, getMerchantRating } from "@/lib/merchantRating
 import { getPreprocessedScore, type PreprocessedProductScore } from "@/lib/preprocessedScores";
 import ProductDetailModal from "./product-detail-modal";
 import ShareScoreModal from "./share-score-modal";
-import ScoreDonutChart from "./score-donut-chart";
+import AnimatedNumber from "./animated-number";
 import type { ProductSustainabilityScore, ScoredTransaction } from "@/lib/geminiAI";
 
 // Icon mapping for merchants
@@ -189,9 +189,9 @@ export default function ModernDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-24">
+    <div className="min-h-screen bg-background text-white pb-24">
       {/* Header */}
-      <header className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -222,7 +222,7 @@ export default function ModernDashboard() {
               </button>
               <button
                 onClick={() => setIsConnectModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-card hover:bg-card/80 border border-border rounded-lg transition-colors"
               >
                 <Settings className="w-4 h-4" />
                 <span className="text-sm font-medium">Manage Merchants</span>
@@ -236,43 +236,70 @@ export default function ModernDashboard() {
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Stats Overview */}
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Overall Score with Donut Chart */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-emerald-500/10 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-emerald-400" />
+          {/* Overall Score */}
+          <div className="relative bg-card/50 border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-emerald-500/50 transition-all group">
+            <div className="absolute inset-0 bg-emerald-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10 w-full">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="text-sm text-zinc-400">Your Sustainability Score</div>
               </div>
-              <div className="text-sm text-zinc-400">Your Sustainability Score</div>
-            </div>
-            <div className="flex justify-center">
-              <ScoreDonutChart score={calculateOverallScore} size={200} />
+              <div
+                className={`text-6xl font-bold mb-3 ${getScoreColor(
+                  calculateOverallScore
+                )} drop-shadow-[0_0_15px_currentColor]`}
+              >
+                <AnimatedNumber value={calculateOverallScore} delay={0} duration={2000} />
+              </div>
+              <div className="text-sm text-zinc-500">
+                {calculateOverallScore >= 80
+                  ? "Excellent"
+                  : calculateOverallScore >= 65
+                  ? "Good"
+                  : calculateOverallScore >= 45
+                  ? "Fair"
+                  : "Needs Work"}
+              </div>
             </div>
           </div>
 
           {/* Total Spent */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <DollarSign className="w-5 h-5 text-blue-400" />
+          <div className="relative bg-card/50 border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-blue-500/50 transition-all group">
+            <div className="absolute inset-0 bg-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10 w-full">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="text-sm text-zinc-400">Total Spending</div>
               </div>
-              <div className="text-sm text-zinc-400">Total Spending</div>
+              <div className="text-5xl font-bold text-white mb-3 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]">
+                <AnimatedNumber value={activeTotalSpent} delay={600} duration={2000} prefix="$" decimals={2} />
+              </div>
+              <div className="text-sm text-zinc-500">Across all merchants</div>
             </div>
-            <div className="text-5xl font-bold text-white mb-3">
-              ${activeTotalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <div className="text-sm text-zinc-500">Across all merchants</div>
           </div>
 
           {/* Total Transactions */}
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <ShoppingBag className="w-5 h-5 text-purple-400" />
+          <div className="relative bg-card/50 border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-purple-500/50 transition-all group">
+            <div className="absolute inset-0 bg-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative z-10 w-full">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-purple-500/10 rounded-lg">
+                  <ShoppingBag className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-sm text-zinc-400">Total Transactions</div>
               </div>
-              <div className="text-sm text-zinc-400">Total Transactions</div>
+              <div className="text-5xl font-bold text-white mb-3 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+                <AnimatedNumber value={activeTotalTransactions} delay={1200} duration={2000} />
+              </div>
+              <div className="text-sm text-zinc-500">All time</div>
             </div>
-            <div className="text-5xl font-bold text-white mb-3">{activeTotalTransactions.toLocaleString()}</div>
-            <div className="text-sm text-zinc-500">All time</div>
           </div>
         </div>
 
@@ -284,7 +311,7 @@ export default function ModernDashboard() {
           </div>
 
           {activeMerchants.length === 0 ? (
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-12 text-center">
+            <div className="bg-card/50 border border-border rounded-2xl p-12 text-center">
               <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
               <h3 className="text-xl font-semibold mb-2">No Merchants Connected</h3>
               <p className="text-zinc-400 mb-6">
@@ -318,10 +345,10 @@ export default function ModernDashboard() {
                     : 0;
 
                 return (
-                  <div key={merchant.id} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+                  <div key={merchant.id} className="bg-card/50 border border-border rounded-2xl overflow-hidden">
                     {/* Merchant Header */}
                     <div
-                      className="p-6 cursor-pointer hover:bg-zinc-800/30 transition-colors"
+                      className="p-6 cursor-pointer hover:bg-card/80 transition-colors"
                       onClick={() => toggleMerchant(merchant.id)}
                     >
                       <div className="flex items-center justify-between">
@@ -366,7 +393,7 @@ export default function ModernDashboard() {
 
                     {/* Transactions List */}
                     {isExpanded && (
-                      <div className="border-t border-zinc-800">
+                      <div className="border-t border-border">
                         <div className="p-6 space-y-3">
                           {merchant.transactions.length === 0 ? (
                             <div className="text-center py-12">
@@ -381,7 +408,7 @@ export default function ModernDashboard() {
                               {visibleTransactions.map((transaction) => (
                                 <div
                                   key={transaction.externalId}
-                                  className="p-4 bg-zinc-800/30 hover:bg-zinc-800/50 border border-zinc-800 rounded-xl transition-all group"
+                                  className="p-4 bg-card/30 hover:bg-card/50 border border-border rounded-xl transition-all group"
                                 >
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
@@ -429,11 +456,11 @@ export default function ModernDashboard() {
                                               className={`flex items-center justify-between p-2 rounded-lg transition-all cursor-pointer ${
                                                 isBadScore
                                                   ? "bg-red-500/5 hover:bg-red-500/10 border border-red-500/20"
-                                                  : "bg-zinc-800/30 hover:bg-zinc-800/50"
+                                                  : "bg-card/30 hover:bg-card/50"
                                               }`}
                                             >
                                               <div className="flex items-center gap-2 flex-1">
-                                                <Package className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                                                <Package className="w-3 h-3 text-zinc-500 shrink-0" />
                                                 <span className="text-sm text-zinc-300">
                                                   {product.quantity}x {product.name}
                                                 </span>
@@ -483,7 +510,7 @@ export default function ModernDashboard() {
                               {hasMore && (
                                 <button
                                   onClick={() => loadMoreTransactions(merchant.id)}
-                                  className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm font-medium transition-colors"
+                                  className="w-full py-3 bg-card hover:bg-card/80 border border-border rounded-xl text-sm font-medium transition-colors"
                                 >
                                   View More ({sortedTransactions.length - limit} remaining)
                                 </button>
