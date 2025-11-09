@@ -26,7 +26,7 @@ export default function Footer() {
               <span className="text-zinc-600">•</span>
               <span className="text-emerald-400 font-medium">Arundhati Das</span>
               <span className="text-zinc-600">•</span>
-              <span className="text-emerald-400 font-medium">Shreeya</span>
+              <span className="text-emerald-400 font-medium">Shreeya Gupta</span>
             </div>
           </div>
 
