@@ -15,6 +15,7 @@ import {
   Settings,
   RefreshCw,
   Share2,
+  Gift,
 } from "lucide-react";
 import { FaAmazon, FaApple } from "react-icons/fa";
 import { SiWalmart, SiTarget, SiDoordash, SiUber, SiInstacart } from "react-icons/si";
@@ -205,6 +206,13 @@ export default function ModernDashboard() {
               </div>
             </Link>
             <div className="flex items-center gap-3">
+              <Link
+                href="/rewards"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-purple-400 rounded-lg transition-colors"
+              >
+                <Gift className="w-4 h-4" />
+                <span className="text-sm font-medium">Rewards</span>
+              </Link>
               <button
                 onClick={() => setIsShareModalOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-lg transition-colors"
@@ -300,6 +308,15 @@ export default function ModernDashboard() {
                 const visibleTransactions = sortedTransactions.slice(0, limit);
                 const hasMore = sortedTransactions.length > limit;
 
+                // Calculate merchant's average score
+                const merchantScore =
+                  merchant.transactions.length > 0
+                    ? Math.round(
+                        merchant.transactions.reduce((sum, t) => sum + (t.score || 50), 0) /
+                          merchant.transactions.length
+                      )
+                    : 0;
+
                 return (
                   <div key={merchant.id} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
                     {/* Merchant Header */}
@@ -329,22 +346,15 @@ export default function ModernDashboard() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                          {merchant.connected ? (
-                            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm font-medium">
-                              Connected
-                            </span>
-                          ) : (
-                            <button
-                              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Handle connect logic
-                              }}
-                            >
-                              <LinkIcon className="w-4 h-4" />
-                              Connect Merchant
-                            </button>
-                          )}
+                          {/* Merchant Score Badge */}
+                          <div className={`px-4 py-2 rounded-lg ${getScoreBgColor(merchantScore)}`}>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-lg font-bold ${getScoreColor(merchantScore)}`}>
+                                {merchantScore}
+                              </span>
+                              <span className="text-xs text-zinc-500">Score</span>
+                            </div>
+                          </div>
                           {isExpanded ? (
                             <ChevronUp className="w-6 h-6 text-zinc-400" />
                           ) : (

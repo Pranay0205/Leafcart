@@ -26,9 +26,6 @@ export default function LandingPage() {
             <a href="#how-it-works" className="text-zinc-400 hover:text-white transition-colors">
               How It Works
             </a>
-            <a href="#impact" className="text-zinc-400 hover:text-white transition-colors">
-              Impact
-            </a>
             <Link
               href="/dashboard"
               className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg font-medium hover:shadow-lg hover:shadow-emerald-500/30 transition-all"
