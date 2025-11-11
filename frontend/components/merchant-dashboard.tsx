@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ChevronDown,
   ChevronUp,
@@ -52,15 +53,8 @@ export default function ModernDashboard() {
   const [expandedMerchant, setExpandedMerchant] = useState<string | null>(null);
   const [transactionLimit, setTransactionLimit] = useState<Record<string, number>>({});
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-  const [connectedMerchantIds, setConnectedMerchantIds] = useState<number[]>([
-    44,
-    45,
-    12,
-    19,
-    165,
-    36,
-    40, // IDs for Amazon, Walmart, Target, DoorDash, Costco, Uber Eats, Instacart
-  ]);
+  const [connectedMerchantIds, setConnectedMerchantIds] = useState<string[]>([]);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   // Product detail modal state
   const [selectedProduct, setSelectedProduct] = useState<{
@@ -79,6 +73,40 @@ export default function ModernDashboard() {
 
   const totalSpent = getTotalSpending();
   const totalTransactions = getTotalTransactionCount();
+
+  // Initialize connected merchants from localStorage or default to some merchants
+  useEffect(() => {
+    console.log("=== INITIALIZATION ===");
+    console.log(
+      "All available merchant IDs:",
+      merchants.map((m) => ({ id: m.id, name: m.name }))
+    );
+
+    const savedMerchants = localStorage.getItem("connectedMerchants");
+    if (savedMerchants) {
+      try {
+        const parsed = JSON.parse(savedMerchants);
+        console.log("Loaded connected merchants from localStorage:", parsed);
+        setConnectedMerchantIds(parsed);
+      } catch (error) {
+        console.error("Error parsing saved merchants:", error);
+        // Default to showing a few merchants
+        setConnectedMerchantIds(["amazon", "walmart", "target"]);
+      }
+    } else {
+      // Default to showing a few merchants
+      console.log("No saved merchants, using defaults: ['amazon', 'walmart', 'target']");
+      setConnectedMerchantIds(["amazon", "walmart", "target"]);
+    }
+  }, []);
+
+  // Save connected merchants to localStorage whenever it changes
+  useEffect(() => {
+    if (connectedMerchantIds.length > 0) {
+      console.log("Saving connected merchants to localStorage:", connectedMerchantIds);
+      localStorage.setItem("connectedMerchants", JSON.stringify(connectedMerchantIds));
+    }
+  }, [connectedMerchantIds]);
 
   const toggleMerchant = (merchantId: string) => {
     if (expandedMerchant === merchantId) {
@@ -118,17 +146,67 @@ export default function ModernDashboard() {
     });
   };
 
-  const handleToggleMerchant = (merchantId: number) => {
-    setConnectedMerchantIds((prev) =>
-      prev.includes(merchantId) ? prev.filter((id) => id !== merchantId) : [...prev, merchantId]
-    );
+  const handleToggleMerchant = (merchantId: string) => {
+    console.log("=== handleToggleMerchant START ===");
+    console.log("merchantId:", merchantId);
+    console.log("Current connectedMerchantIds:", connectedMerchantIds);
+
+    const isConnected = connectedMerchantIds.includes(merchantId);
+    const merchant = merchants.find((m) => m.id === merchantId);
+
+    console.log("isConnected:", isConnected);
+    console.log("merchant found:", merchant?.name);
+
+    if (isConnected) {
+      // Disconnect merchant
+      const newIds = connectedMerchantIds.filter((id) => id !== merchantId);
+      console.log("Disconnecting - new IDs:", newIds);
+      setConnectedMerchantIds(newIds);
+
+      toast.success("Merchant disconnected", {
+        description: `${merchant?.name} has been disconnected`,
+      });
+    } else {
+      // Connect merchant
+      const newIds = [...connectedMerchantIds, merchantId];
+      console.log("Connecting - new IDs:", newIds);
+      setConnectedMerchantIds(newIds);
+
+      toast.success("Merchant connected!", {
+        description: `${merchant?.name} is now connected.`,
+      });
+    }
+    console.log("=== handleToggleMerchant END ===");
   };
 
-  // Show all merchants from merchant data - they all have transaction data loaded
+  // Show only connected merchants with their transactions
   const activeMerchants = useMemo(() => {
-    // Simply return all merchants from merchantData since all JSON files are loaded
-    return merchants.filter((m) => m.connected);
-  }, []);
+    console.log("Computing activeMerchants...");
+    console.log("connectedMerchantIds:", connectedMerchantIds);
+    console.log(
+      "Available merchants:",
+      merchants.map((m) => m.id)
+    );
+
+    const filtered = merchants.filter((merchant) => {
+      const isIncluded = connectedMerchantIds.includes(merchant.id);
+      console.log(`Merchant ${merchant.name} (${merchant.id}): ${isIncluded ? "INCLUDED" : "excluded"}`);
+      return isIncluded;
+    });
+
+    console.log("Filtered merchants count:", filtered.length);
+    console.log(
+      "Filtered merchant names:",
+      filtered.map((m) => m.name)
+    );
+
+    return filtered.map((merchant) => {
+      return {
+        ...merchant,
+        connected: true,
+      };
+    });
+  }, [connectedMerchantIds, merchants]);
 
   // Calculate overall score from preprocessed data
   const calculateOverallScore = useMemo(() => {
@@ -397,9 +475,9 @@ export default function ModernDashboard() {
                           {merchant.transactions.length === 0 ? (
                             <div className="text-center py-12">
                               <Package className="w-12 h-12 mx-auto mb-3 text-zinc-600" />
-                              <p className="text-zinc-400 font-medium mb-1">No transactions yet</p>
+                              <p className="text-zinc-400 font-medium mb-1">No Transactions Available</p>
                               <p className="text-sm text-zinc-500">
-                                Transaction data will appear here once you make purchases
+                                Transaction data for {merchant.name} is not available yet
                               </p>
                             </div>
                           ) : (
@@ -413,6 +491,21 @@ export default function ModernDashboard() {
                                     <div className="flex-1">
                                       <div className="flex items-center gap-3 mb-2">
                                         <span className="font-medium">Order #{transaction.externalId}</span>
+                                        {/* Data Source Indicator */}
+                                        <span
+                                          className={`px-2 py-1 rounded text-xs font-medium ${
+                                            (transaction as any).source === "knot"
+                                              ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                              : "bg-zinc-500/10 text-zinc-400"
+                                          }`}
+                                          title={
+                                            (transaction as any).source === "knot"
+                                              ? "Real data from Knot API"
+                                              : "Demo data"
+                                          }
+                                        >
+                                          {(transaction as any).source === "knot" ? "🔗 Live" : "📋 Demo"}
+                                        </span>
                                         <span
                                           className={`px-2 py-1 rounded text-xs font-medium ${
                                             transaction.orderStatus === "DELIVERED"
